@@ -1,0 +1,178 @@
+
+
+#include "word.h"
+
+using namespace std;
+	/**
+         * simple resize function
+         *
+         *
+         */
+        void Word::resizePageList(){
+            if (DEBUGl3)
+                cout << "Resizing Page List from " << pageCap
+                    << " to " << (pageCap + 10) << endl;
+            int* temp = new int[pageCap+10];
+            for (int i = 0; i < pageCap; i++)
+                temp[i] = pageList[i];
+            delete [] pageList;
+            pageCap += 10;
+            pageList = temp;
+            delete [] temp;
+        }
+
+        /**
+         * This constructor constructs the word
+         * with the parameter value and initializes
+         * the pageList
+         */
+        Word::Word(char* input)
+        {
+            string = new char[strlen(input) + 1];
+            strcpy (string, input);
+            pageList = new int[10];
+            pageSize = 0;
+            pageCap= 10;
+        }
+
+        /**
+         * copy constructor for word
+         * ensures deep copy
+         */
+        Word::Word (const Word& rhs)
+        {
+            string = new char[strlen(rhs.string) + 1];
+            strcpy(string, rhs.string);
+            pageList = new int[rhs.pageCap];
+            for (int i = 0; i < rhs.pageCap; i++)
+                pageList[i] = rhs.pageList[i];
+            pageCap = rhs.pageCap;
+            pageSize = rhs.pageSize;
+
+
+        }
+        /**
+         * deconstructor, deletes string and pagelist
+         *
+         *
+         */
+        Word::~Word()
+        {
+            delete[]string;
+            delete[]pageList;
+        }
+
+        /**
+         * overloaded assignment operator
+         * to ensure that deep copy is performed
+         */
+        Word& Word::operator=(const Word& rhs)
+        {
+            if(this != &rhs)
+            {
+                delete [] string;
+                delete [] pageList;
+
+                string = new char[strlen(rhs.string) + 1];
+                strcpy(string, rhs.string);
+                pageList = new int[rhs.pageCap];
+                for (int i = 0; i < rhs.pageCap; i++)
+                    pageList[i] = rhs.pageList[i];
+                pageCap = rhs.pageCap;
+                pageSize = rhs.pageSize;
+
+            }
+            return *this;
+        }
+
+        /**
+         * determines if this word matches the
+         * parameter value word
+         */
+        bool Word::equals(char* temp)
+        {
+            if(strcmp(string, temp) == 0)
+                return true;
+            return false;
+        }
+
+        /**
+         * addPageToList will add a page number
+         * to the list of pages this word appears on
+         * only if that page number doesn't already
+         * exist in the list.
+         */
+        void Word::addPageToList(int newPage)
+        {
+            if (pageSize == pageCap)
+                resizePageList();
+
+            //only add this page number if
+            //it doesn't already appear in the list
+            if (!isOnPage(newPage))
+            {
+                pageList[pageSize] = newPage;
+                pageSize++;
+            }
+        }
+
+        /**
+         * isOnPage determines if a page number
+         * has already been added to the page list
+         * of this word
+         */
+        bool Word::isOnPage (int pageNum)
+        {
+            for(int i = 0; i < pageSize; i++)
+                if (pageList[i] == pageNum)
+                    return true;
+            return false;
+        }
+
+        /**
+         * returns the number of pages that this
+         * word appears on
+         */
+        int Word::getNumPages()
+        {
+            return pageSize;
+        }
+
+        /*
+         * We'll make the caller responsible for sending an
+         * array to us.  They will need to call getNumPages to
+         * find out how big the array needs to be.
+         *
+         * This is not optimal.... Glaring hole/potential seg fault.
+         */
+        void Word::getPageList(int* tempPageList)
+        {
+            sort(pageList, pageList + pageSize);
+            for (int i = 0; i < pageSize; i++)
+                tempPageList[i] = pageList[i];
+        }
+
+        /**
+         * returns a copy of this word
+         */
+        char* Word::getWord()
+        {
+            return string;
+        }
+
+        /**
+         * helper function (ergo static) that
+         * converts a string to upper case
+         */
+        void Word::toUpper(char* str)
+        {
+            int len = strlen(str);
+            for (int i = 0; i < len; i++)
+                str[i] = toupper(str[i]);
+        }
+
+        bool Word::operator< (const Word& rhs)
+        {
+            return (strcmp(this->string, rhs.string) < 0);
+        }
+
